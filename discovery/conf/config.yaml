@@ -1,0 +1,12 @@
+---
+serverconfig:
+  ipaddr: "127.0.0.1"
+  port: 8080
+clientconfig:
+  namespaceId:
+  logDir: "/tmp/log"
+  cacheDir: "/tmp/cache"
+  rotateTime: "1h"
+  maxAge: 3
+  logLevel: "debug"
+
