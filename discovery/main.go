@@ -6,12 +6,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 	"github.com/spf13/viper"
+
+	"nacos-sdk-go-example/discovery/uuid"
 )
 
 var (
@@ -56,14 +57,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	serviceName, err := uuid.NewUUID()
+	serviceName := uuid.GenerateServiceName()
 	if err != nil {
 		panic(err)
 	}
 	registerInstanceParam := vo.RegisterInstanceParam{
 		Ip:          "10.10.10.11",
 		Port:        8848,
-		ServiceName: serviceName.String(),
+		ServiceName: serviceName,
 		Weight:      10,
 		ClusterName: "cluster-a",
 		Enable:      true,
