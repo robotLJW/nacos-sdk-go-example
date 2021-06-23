@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
@@ -10,42 +9,31 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"github.com/spf13/viper"
 
-	"nacos-sdk-go-example/discovery/uuid"
+	"nacos-sdk-go-example/pkg/config"
+	"nacos-sdk-go-example/pkg/naming"
+	"nacos-sdk-go-example/pkg/uuid"
 )
 
-var (
-	once sync.Once
-
-	serverIpAddr string
-	serverPort   uint64
-
-	clientNamespaceId string
-	clientLogDir      string
-	clientCacheDir    string
-	clientRotateTime  string
-	clientMaxAge      int64
-	clientLogLevel    string
-)
+var wg sync.WaitGroup
 
 func main() {
-	readConfig()
+	config.ReadConfig("config", "/conf", "yaml")
 	sc := []constant.ServerConfig{
 		{
-			IpAddr: serverIpAddr,
-			Port:   serverPort,
+			IpAddr: config.ConfigMessage.Server.IpAddr,
+			Port:   config.ConfigMessage.Server.Port,
 		},
 	}
 	cc := constant.ClientConfig{
-		NamespaceId:         clientNamespaceId,
+		NamespaceId:         config.ConfigMessage.Client.NamespaceId,
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
-		LogDir:              clientLogDir,
-		CacheDir:            clientCacheDir,
-		RotateTime:          clientRotateTime,
-		MaxAge:              clientMaxAge,
-		LogLevel:            clientLogLevel,
+		LogDir:              config.ConfigMessage.Client.LogDir,
+		CacheDir:            config.ConfigMessage.Client.CacheDir,
+		RotateTime:          config.ConfigMessage.Client.RotateTime,
+		MaxAge:              config.ConfigMessage.Client.MaxAge,
+		LogLevel:            config.ConfigMessage.Client.LogLevel,
 	}
 
 	client, err := clients.NewNamingClient(
@@ -55,63 +43,44 @@ func main() {
 		},
 	)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	serviceName := uuid.GenerateServiceName()
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
-	registerInstanceParam := vo.RegisterInstanceParam{
-		Ip:          "10.10.10.11",
-		Port:        8848,
-		ServiceName: serviceName,
-		Weight:      10,
-		ClusterName: "cluster-a",
-		Enable:      true,
-		Healthy:     true,
-		Ephemeral:   true,
+
+	instanceCount := config.ConfigMessage.Basic.InstanceCount
+
+	for i := 1; i <= instanceCount; i++ {
+		wg.Add(1)
+		registerInstanceParam := vo.RegisterInstanceParam{
+			Ip:          config.ConfigMessage.Basic.InstanceIp,
+			Port:        config.ConfigMessage.Basic.InstancePort + uint64(i),
+			ServiceName: serviceName,
+			Weight:      10,
+			ClusterName: config.ConfigMessage.Basic.InstanceClusterName,
+			Enable:      true,
+			Healthy:     true,
+			Ephemeral:   true,
+		}
+		go registerInstance(client, registerInstanceParam)
 	}
-	err = registerServiceInstance(client, registerInstanceParam)
+	wg.Wait()
+	time.Sleep(360000 * time.Second)
+}
+
+func registerInstance(client naming_client.INamingClient, param vo.RegisterInstanceParam) {
+	err := naming.RegisterServiceInstance(client, param)
 	for {
 		if err != nil {
-			err = registerServiceInstance(client, registerInstanceParam)
+			fmt.Println(err)
+			err = naming.RegisterServiceInstance(client, param)
 		} else {
 			break
 		}
 	}
-	time.Sleep(360000 * time.Second)
-}
-
-func readConfig() {
-	once.Do(func() {
-		path, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-		viper.SetConfigName("config")
-		viper.AddConfigPath(path + "/discovery/conf")
-		viper.SetConfigType("yaml")
-		err = viper.ReadInConfig()
-		if err != nil {
-			panic(fmt.Errorf("Fatal error config file: %s \n", err))
-		}
-		serverIpAddr = viper.GetString("serverconfig.ipaddr")
-		serverPort = viper.GetUint64("serverconfig.port")
-
-		clientNamespaceId = viper.GetString("clientconfig.namespaceId")
-		clientLogDir = viper.GetString("clientconfig.logDir")
-		clientCacheDir = viper.GetString("clientconfig.cacheDir")
-		clientRotateTime = viper.GetString("clientconfig.rotateTime")
-		clientMaxAge = viper.GetInt64("clientconfig.maxAge")
-		clientLogLevel = viper.GetString("clientconfig.logLevel")
-	})
-}
-
-func registerServiceInstance(client naming_client.INamingClient, param vo.RegisterInstanceParam) error {
-	success, err := client.RegisterInstance(param)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("RegisterServiceInstance, param:+%v,result:%+v \n", param, success)
-	return nil
+	wg.Done()
 }

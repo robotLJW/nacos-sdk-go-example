@@ -1,7 +1,7 @@
 ---
 serverconfig:
   ipaddr: "127.0.0.1"
-  port: 8080
+  port: 8848
 clientconfig:
   namespaceId:
   logDir: "/tmp/log"
@@ -9,4 +9,8 @@ clientconfig:
   rotateTime: "1h"
   maxAge: 3
   logLevel: "debug"
-
+basicconfig:
+  instanceIp: "10.10.10.11"
+  instancePort: 8848
+  instanceCount: 1
+  instanceClusterName: "cluster-A"
