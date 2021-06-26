@@ -1,4 +1,4 @@
-FROM centos:latest
+FROM busybox:latest
 
 COPY ./conf /home/conf
 COPY ./subscribe /home
