@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/clients/naming_client"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/model"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/model"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
 	"nacos-sdk-go-example/pkg/config"
 	"nacos-sdk-go-example/pkg/naming"
@@ -21,10 +21,7 @@ var wg sync.WaitGroup
 func main() {
 	config.ReadConfig("config", "/conf", "yaml")
 	sc := []constant.ServerConfig{
-		{
-			IpAddr: config.ConfigMessage.Server.IpAddr,
-			Port:   config.ConfigMessage.Server.Port,
-		},
+		*constant.NewServerConfig(config.ConfigMessage.Server.IpAddr, config.ConfigMessage.Server.Port),
 	}
 	cc := constant.ClientConfig{
 		NamespaceId:         config.ConfigMessage.Client.NamespaceId,
@@ -90,8 +87,8 @@ func main() {
 	naming.Subscribe(client, &vo.SubscribeParam{
 		ServiceName: serviceName,
 		Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
-		SubscribeCallback: func(services []model.SubscribeService, err error) {
-			fmt.Printf("callback222 return services:%+v \n", services)
+		SubscribeCallback: func(instances []model.Instance, err error) {
+			fmt.Printf("callback222 return instance:%+v \n", instances)
 		},
 	})
 
