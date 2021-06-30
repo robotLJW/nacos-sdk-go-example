@@ -39,9 +39,14 @@ func main() {
 			ServerConfigs: sc,
 		},
 	)
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+	for err != nil {
+		time.Sleep(10 * time.Second)
+		client, err = clients.NewNamingClient(
+			vo.NacosClientParam{
+				ClientConfig:  &cc,
+				ServerConfigs: sc,
+			},
+		)
 	}
 	serviceName := uuid.GenerateServiceName()
 	if err != nil {
