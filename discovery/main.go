@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -48,7 +50,9 @@ func main() {
 			},
 		)
 	}
-	serviceName := uuid.GenerateServiceName()
+	hostname, _ := os.Hostname()
+	bytename := []byte(hostname)[len(hostname)-5:]
+	serviceName := strings.Join([]string{string(bytename), uuid.GenerateServiceName()}, "3")
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
@@ -64,6 +68,7 @@ func main() {
 			ServiceName: serviceName,
 			Weight:      10,
 			ClusterName: config.ConfigMessage.Basic.InstanceClusterName,
+			GroupName:   "group-A",
 			Enable:      true,
 			Healthy:     true,
 			Ephemeral:   true,
