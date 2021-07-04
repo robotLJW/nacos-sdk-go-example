@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -50,12 +48,14 @@ func main() {
 			},
 		)
 	}
-	hostname, _ := os.Hostname()
-	bytename := []byte(hostname)[len(hostname)-5:]
-	serviceName := strings.Join([]string{string(bytename), uuid.GenerateServiceName()}, "3")
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
+	}
+
+	serviceName := uuid.GenerateServiceName()
+	if len(config.ConfigMessage.Client.ServiceName) != 0 {
+		serviceName = config.ConfigMessage.Client.ServiceName
 	}
 
 	instanceCount := config.ConfigMessage.Basic.InstanceCount

@@ -4,6 +4,7 @@ serverconfig:
   port: 8848
 clientconfig:
   namespaceId:
+  serviceName: "name1"
   logDir: "/tmp/log"
   cacheDir: "/tmp/cache"
   rotateTime: "1h"
