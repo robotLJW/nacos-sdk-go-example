@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"strconv"
 	"sync"
 	"time"
 
@@ -40,14 +42,18 @@ func main() {
 			ServerConfigs: sc,
 		},
 	)
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+	for err != nil {
+		time.Sleep(10 * time.Second)
+		client, err = clients.NewNamingClient(
+			vo.NacosClientParam{
+				ClientConfig:  &cc,
+				ServerConfigs: sc,
+			},
+		)
 	}
 	serviceName := uuid.GenerateServiceName()
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
+	if len(config.ConfigMessage.Client.ServiceName) != 0 {
+		serviceName = config.ConfigMessage.Client.ServiceName
 	}
 	instanceCount := config.ConfigMessage.Basic.InstanceCount
 
@@ -80,18 +86,35 @@ func main() {
 		Ephemeral:   true,
 	}
 	err = naming.RegisterServiceInstance(client, registerInstanceParam)
-	if err != nil {
+	for err != nil {
 		fmt.Println(err)
-		panic(err)
+		err = naming.RegisterServiceInstance(client, registerInstanceParam)
+		if err == nil {
+			break
+		}
 	}
-	naming.Subscribe(client, &vo.SubscribeParam{
-		ServiceName: serviceName,
-		Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
-		SubscribeCallback: func(instances []model.Instance, err error) {
-			fmt.Printf("callback222 return instance:%+v \n", instances)
-		},
-	})
-
+	for i := 1; i <= 2; {
+		service := randomServiceName("service", 500)
+		err := naming.Subscribe(client, &vo.SubscribeParam{
+			ServiceName: service,
+			Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
+			SubscribeCallback: func(instances []model.Instance, err error) {
+				fmt.Printf("callback222 return instance:%+v \n", instances)
+			},
+		})
+		for err != nil {
+			fmt.Println(err)
+			service = randomServiceName("service", 500)
+			err = naming.Subscribe(client, &vo.SubscribeParam{
+				ServiceName: service,
+				Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
+				SubscribeCallback: func(instances []model.Instance, err error) {
+					fmt.Printf("callback222 return instance:%+v \n", instances)
+				},
+			})
+		}
+		i++
+	}
 	time.Sleep(360000 * time.Second)
 }
 
@@ -106,4 +129,9 @@ func registerInstance(client naming_client.INamingClient, param vo.RegisterInsta
 		}
 	}
 	wg.Done()
+}
+
+func randomServiceName(baseName string, scope int) string {
+	randomNum := rand.Intn(scope)
+	return baseName + strconv.Itoa(randomNum)
 }
