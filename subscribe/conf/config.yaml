@@ -15,4 +15,5 @@ basicconfig:
   instancePort: 8848
   instanceCount: 1
   instanceClusterName: "cluster-A"
+  subscribeScope: 500
 

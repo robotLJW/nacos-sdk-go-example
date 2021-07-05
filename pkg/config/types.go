@@ -20,6 +20,7 @@ type BasicMessage struct {
 	InstancePort        uint64
 	InstanceCount       int
 	InstanceClusterName string
+	SubscribeScope      int
 }
 
 type Config struct {

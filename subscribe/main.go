@@ -68,48 +68,29 @@ func main() {
 			Enable:      true,
 			Healthy:     true,
 			Ephemeral:   true,
+			GroupName:   "group-A",
 		}
 		go registerInstance(client, registerInstanceParam)
 	}
 	wg.Wait()
-
-	serviceNameOne := uuid.GenerateServiceName()
-
-	registerInstanceParam := vo.RegisterInstanceParam{
-		Ip:          config.ConfigMessage.Basic.InstanceIp,
-		Port:        config.ConfigMessage.Basic.InstancePort,
-		ServiceName: serviceNameOne,
-		Weight:      10,
-		ClusterName: config.ConfigMessage.Basic.InstanceClusterName,
-		Enable:      true,
-		Healthy:     true,
-		Ephemeral:   true,
-	}
-	err = naming.RegisterServiceInstance(client, registerInstanceParam)
-	for err != nil {
-		fmt.Println(err)
-		err = naming.RegisterServiceInstance(client, registerInstanceParam)
-		if err == nil {
-			break
-		}
-	}
+	scope := config.ConfigMessage.Basic.SubscribeScope
 	for i := 1; i <= 2; {
-		service := randomServiceName("service", 500)
+		service := randomServiceName("service", scope)
 		err := naming.Subscribe(client, &vo.SubscribeParam{
 			ServiceName: service,
 			Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
 			SubscribeCallback: func(instances []model.Instance, err error) {
-				fmt.Printf("callback222 return instance:%+v \n", instances)
+				fmt.Printf("callback service: %+v return instance:%+v \n", service, instances)
 			},
 		})
 		for err != nil {
 			fmt.Println(err)
-			service = randomServiceName("service", 500)
+			service = randomServiceName("service", scope)
 			err = naming.Subscribe(client, &vo.SubscribeParam{
 				ServiceName: service,
 				Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
 				SubscribeCallback: func(instances []model.Instance, err error) {
-					fmt.Printf("callback222 return instance:%+v \n", instances)
+					fmt.Printf("callback service: %+v return instance:%+v \n", service, instances)
 				},
 			})
 		}
