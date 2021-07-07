@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nacos-group/nacos-sdk-go/v2/clients/naming_client"
-
+	"github.com/nacos-group/nacos-sdk-go/v2/model"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
@@ -15,6 +15,10 @@ func RegisterServiceInstance(client naming_client.INamingClient, param vo.Regist
 	}
 	fmt.Printf("RegisterServiceInstance, param:+%v,result:%+v \n", param, success)
 	return nil
+}
+
+func GetOneHealthInstance(client naming_client.INamingClient, param vo.SelectOneHealthInstanceParam) (*model.Instance, error) {
+	return client.SelectOneHealthyInstance(param)
 }
 
 func Subscribe(client naming_client.INamingClient, param *vo.SubscribeParam) error {
