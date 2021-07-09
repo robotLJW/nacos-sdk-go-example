@@ -5,6 +5,7 @@ serverconfig:
 clientconfig:
   namespaceId:
   serviceName: "consumer"
+  scope: 10000
   logDir: "/tmp/log"
   cacheDir: "/tmp/cache"
   rotateTime: "1h"

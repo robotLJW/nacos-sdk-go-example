@@ -8,9 +8,13 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/v2/model"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"io/ioutil"
+	"math/rand"
 	"nacos-sdk-go-example/pkg/config"
 	"nacos-sdk-go-example/pkg/naming"
+	"nacos-sdk-go-example/pkg/uuid"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 var address string
@@ -41,7 +45,7 @@ func main() {
 		fmt.Println(err)
 		panic(err)
 	}
-	serviceName := config.ConfigMessage.Client.ServiceName
+	serviceName := uuid.GenerateServiceName()
 	registerInstanceParam := vo.RegisterInstanceParam{
 		Ip:          config.ConfigMessage.Basic.InstanceIp,
 		Port:        config.ConfigMessage.Basic.InstancePort,
@@ -55,33 +59,41 @@ func main() {
 	}
 	go registerInstance(client, registerInstanceParam)
 
-	instanceParam := vo.SelectOneHealthInstanceParam{
-		Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
-		ServiceName: "provider",
-		GroupName:   "group-A",
-	}
-	instance, err := naming.GetOneHealthInstance(client, instanceParam)
-	if err != nil {
-		panic(err)
-	}
-	address = fmt.Sprintf("http://%s:%v/", instance.Ip, instance.Port)
-	fmt.Println(address)
+	//instanceParam := vo.SelectOneHealthInstanceParam{
+	//	Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
+	//	ServiceName: "provider",
+	//	GroupName:   "group-A",
+	//}
+	//instance, err := naming.GetOneHealthInstance(client, instanceParam)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//address = fmt.Sprintf("http://%s:%v/", instance.Ip, instance.Port)
+	//fmt.Println(address)
 
-	err = naming.Subscribe(client, &vo.SubscribeParam{
-		ServiceName: "provider",
-		Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
-		GroupName:   "group-A",
-		SubscribeCallback: func(instances []model.Instance, err error) {
-			if len(instances) != 0 {
-				address = fmt.Sprintf("http://%s:%v/", instances[0].Ip, instances[0].Port)
-			} else {
-				address = ""
-			}
-			fmt.Println(fmt.Sprintf("callback service: %+v return instance:%+v \n", "provider", instances))
-		},
-	})
-	http.HandleFunc("/", Hello)
-	http.ListenAndServe(":8888", nil)
+	basicServiceName := config.ConfigMessage.Client.ServiceName
+	scope := config.ConfigMessage.Client.Scope
+	for i := 1; i <= 2; i++ {
+		subscribeName := randomService(basicServiceName, scope)
+		fmt.Println(subscribeName)
+		err = naming.Subscribe(client, &vo.SubscribeParam{
+			ServiceName: subscribeName,
+			Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
+			GroupName:   "group-A",
+			SubscribeCallback: func(instances []model.Instance, err error) {
+				if len(instances) != 0 {
+					address = fmt.Sprintf("http://%s:%v/", instances[0].Ip, instances[0].Port)
+				} else {
+					address = ""
+				}
+				fmt.Println(fmt.Sprintf("callback service: %+v return instance:%+v \n", "provider", instances))
+			},
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
+	time.Sleep(360000 * time.Second)
 }
 
 func getHelloFromProvider(address string) string {
@@ -97,7 +109,6 @@ func Hello(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintf(response, data)
 }
 
-
 func registerInstance(client naming_client.INamingClient, param vo.RegisterInstanceParam) {
 	err := naming.RegisterServiceInstance(client, param)
 	for {
@@ -108,4 +119,8 @@ func registerInstance(client naming_client.INamingClient, param vo.RegisterInsta
 			break
 		}
 	}
+}
+
+func randomService(serviceName string, scope int) string {
+	return serviceName + strconv.Itoa(rand.Intn(scope))
 }

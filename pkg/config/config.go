@@ -33,6 +33,7 @@ func ReadConfig(configName string, configPath string, configType string) {
 		clientMessage := ClientMessage{
 			NamespaceId: viper.GetString("clientconfig.namespaceId"),
 			ServiceName: viper.GetString("clientconfig.serviceName"),
+			Scope:       viper.GetInt("clientconfig.scope"),
 			LogDir:      viper.GetString("clientconfig.logDir"),
 			CacheDir:    viper.GetString("clientconfig.cacheDir"),
 			RotateTime:  viper.GetString("clientconfig.rotateTime"),
@@ -43,7 +44,6 @@ func ReadConfig(configName string, configPath string, configType string) {
 		basicMessage := BasicMessage{
 			InstanceIp:          viper.GetString("basicconfig.instanceIp"),
 			InstancePort:        viper.GetUint64("basicconfig.instancePort"),
-			InstanceCount:       viper.GetInt("basicconfig.instanceCount"),
 			InstanceClusterName: viper.GetString("basicconfig.instanceClusterName"),
 			SubscribeScope:      viper.GetInt("basicconfig.subscribeScope"),
 		}

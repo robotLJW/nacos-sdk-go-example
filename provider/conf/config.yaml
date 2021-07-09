@@ -5,6 +5,7 @@ serverconfig:
 clientconfig:
   namespaceId:
   serviceName: "provider"
+  scope: 10000
   logDir: "/tmp/log"
   cacheDir: "/tmp/cache"
   rotateTime: "1h"
@@ -13,6 +14,5 @@ clientconfig:
 basicconfig:
   instanceIp: "10.10.10.11"
   instancePort: 8080
-  instanceCount: 1
   instanceClusterName: "cluster-A"
   subscribeScope: 500

@@ -8,6 +8,7 @@ type ServerMessage struct {
 type ClientMessage struct {
 	NamespaceId string
 	ServiceName string
+	Scope       int
 	LogDir      string
 	CacheDir    string
 	RotateTime  string
