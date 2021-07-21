@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"nacos-sdk-go-example/pkg/name"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +19,11 @@ import (
 
 func main() {
 	config.ReadConfig("config", "/conf", "yaml")
+	serviceNameAddr := config.ConfigMessage.Basic.NameServerAddr
+	serviceName, err := name.ReadName(serviceNameAddr)
+	if err != nil {
+		panic(err)
+	}
 	ipAddr := strings.Split(config.ConfigMessage.Server.IpAddr, ",")
 	sc := make([]constant.ServerConfig, 0)
 	for i := 0; i < len(ipAddr); i++ {
@@ -47,7 +53,6 @@ func main() {
 		panic(err)
 	}
 
-	serviceName := config.ConfigMessage.Client.ServiceName
 	scope := config.ConfigMessage.Client.Scope
 
 	instanceParam := vo.RegisterInstanceParam{

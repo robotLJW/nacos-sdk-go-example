@@ -10,10 +10,11 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"nacos-sdk-go-example/pkg/config"
+	"nacos-sdk-go-example/pkg/name"
 	"nacos-sdk-go-example/pkg/naming"
-	"nacos-sdk-go-example/pkg/uuid"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,8 +22,17 @@ var address string
 
 func main() {
 	config.ReadConfig("config", "/conf", "yaml")
-	sc := []constant.ServerConfig{
-		*constant.NewServerConfig(config.ConfigMessage.Server.IpAddr, config.ConfigMessage.Server.Port),
+	serviceNameAddr := config.ConfigMessage.Basic.NameServerAddr
+	serviceName, err := name.ReadName(serviceNameAddr)
+	if err != nil {
+		panic(err)
+	}
+	ipAddr := strings.Split(config.ConfigMessage.Server.IpAddr, ",")
+	sc := make([]constant.ServerConfig, 0)
+	for i := 0; i < len(ipAddr); i++ {
+		tmpServerConfig := *constant.NewServerConfig(ipAddr[i], config.ConfigMessage.Server.Port)
+		sc = append(sc, tmpServerConfig)
+		fmt.Println(ipAddr[i])
 	}
 	cc := constant.ClientConfig{
 		NamespaceId:         config.ConfigMessage.Client.NamespaceId,
@@ -45,10 +55,10 @@ func main() {
 		fmt.Println(err)
 		panic(err)
 	}
-	serviceName := uuid.GenerateServiceName()
+	scope := config.ConfigMessage.Client.Scope
 	registerInstanceParam := vo.RegisterInstanceParam{
-		Ip:          config.ConfigMessage.Basic.InstanceIp,
-		Port:        config.ConfigMessage.Basic.InstancePort,
+		Ip:          config.ConfigMessage.Basic.InstanceIp + strconv.Itoa(randomNumb(scope)),
+		Port:        config.ConfigMessage.Basic.InstancePort + uint64(randomNumb(scope)),
 		ServiceName: serviceName,
 		Weight:      10,
 		ClusterName: config.ConfigMessage.Basic.InstanceClusterName,
@@ -59,20 +69,9 @@ func main() {
 	}
 	go registerInstance(client, registerInstanceParam)
 
-	//instanceParam := vo.SelectOneHealthInstanceParam{
-	//	Clusters:    []string{config.ConfigMessage.Basic.InstanceClusterName},
-	//	ServiceName: "provider",
-	//	GroupName:   "group-A",
-	//}
-	//instance, err := naming.GetOneHealthInstance(client, instanceParam)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//address = fmt.Sprintf("http://%s:%v/", instance.Ip, instance.Port)
-	//fmt.Println(address)
 
 	basicServiceName := config.ConfigMessage.Client.ServiceName
-	scope := config.ConfigMessage.Client.Scope
+	scope = config.ConfigMessage.Client.Scope
 	for i := 1; i <= 2; i++ {
 		subscribeName := randomService(basicServiceName, scope)
 		fmt.Println(subscribeName)
@@ -123,4 +122,8 @@ func registerInstance(client naming_client.INamingClient, param vo.RegisterInsta
 
 func randomService(serviceName string, scope int) string {
 	return serviceName + strconv.Itoa(rand.Intn(scope))
+}
+
+func randomNumb(scope int) int {
+	return rand.Intn(scope)
 }

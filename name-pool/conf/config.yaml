@@ -3,3 +3,4 @@ config:
   prefixName: "provider"
   scope: 5000
   replica: 2
+  port: 8888

@@ -17,3 +17,4 @@ basicconfig:
   instanceCount: 1
   instanceClusterName: "cluster-A"
   subscribeScope: 500
+  nameServerAddr: "127.0.0.1"

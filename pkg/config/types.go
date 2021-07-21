@@ -22,6 +22,7 @@ type BasicMessage struct {
 	InstanceCount       int
 	InstanceClusterName string
 	SubscribeScope      int
+	NameServerAddr      string
 }
 
 type Config struct {

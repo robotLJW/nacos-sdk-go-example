@@ -16,3 +16,4 @@ basicconfig:
   instancePort: 8080
   instanceClusterName: "cluster-A"
   subscribeScope: 500
+  nameServerAddr: "127.0.0.1"

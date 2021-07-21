@@ -14,6 +14,7 @@ type config struct {
 	prefixName string
 	scope      int
 	replica    int
+	port       string
 }
 
 var once sync.Once
@@ -51,6 +52,7 @@ func readConfig(configName string, configPath string, configType string) {
 			prefixName: viper.GetString("config.prefixName"),
 			scope:      viper.GetInt("config.scope"),
 			replica:    viper.GetInt("config.replica"),
+			port:       viper.GetString("config.port"),
 		}
 	})
 }
@@ -73,7 +75,7 @@ func main() {
 	}
 	index = 0
 	http.HandleFunc("/name", getName)
-	if err := http.ListenAndServe(":8888", nil); err != nil {
+	if err := http.ListenAndServe(":"+configMessage.port, nil); err != nil {
 		log.Fatal(err)
 	}
 
@@ -92,5 +94,6 @@ func readName() string {
 		index++
 	}
 	mutex.Unlock()
+	fmt.Println(str)
 	return str
 }
