@@ -56,7 +56,7 @@ func readConfig(configName string, configPath string, configType string) {
 }
 
 func main() {
-	readConfig("config", "/name-pool/conf", "yaml")
+	readConfig("config", "/conf", "yaml")
 	if configMessage.scope < 0 {
 		namePoolQueue = make([]string, defaultQueueLength*defaultReplica)
 		length = defaultQueueLength * defaultReplica
