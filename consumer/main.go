@@ -67,8 +67,18 @@ func main() {
 		Healthy:     true,
 		Ephemeral:   true,
 	}
-	go registerInstance(client, registerInstanceParam)
 
+	err = naming.RegisterServiceInstance(client, registerInstanceParam)
+	for {
+		if err != nil {
+			fmt.Println(err)
+			err = naming.RegisterServiceInstance(client, registerInstanceParam)
+		} else {
+			break
+		}
+	}
+
+	//go registerInstance(client, registerInstanceParam)
 
 	basicServiceName := config.ConfigMessage.Client.ServiceName
 	scope = config.ConfigMessage.Client.Scope

@@ -57,25 +57,19 @@ func main() {
 	if len(config.ConfigMessage.Client.ServiceName) != 0 {
 		serviceName = config.ConfigMessage.Client.ServiceName
 	}
-
-	instanceCount := config.ConfigMessage.Basic.InstanceCount
-
-	for i := 1; i <= instanceCount; i++ {
-		wg.Add(1)
-		registerInstanceParam := vo.RegisterInstanceParam{
-			Ip:          config.ConfigMessage.Basic.InstanceIp,
-			Port:        config.ConfigMessage.Basic.InstancePort + uint64(i),
-			ServiceName: serviceName,
-			Weight:      10,
-			ClusterName: config.ConfigMessage.Basic.InstanceClusterName,
-			GroupName:   "group-A",
-			Enable:      true,
-			Healthy:     true,
-			Ephemeral:   true,
-		}
-		go registerInstance(client, registerInstanceParam)
+	registerInstanceParam := vo.RegisterInstanceParam{
+		Ip:          config.ConfigMessage.Basic.InstanceIp,
+		Port:        config.ConfigMessage.Basic.InstancePort,
+		ServiceName: serviceName,
+		Weight:      10,
+		ClusterName: config.ConfigMessage.Basic.InstanceClusterName,
+		GroupName:   "group-A",
+		Enable:      true,
+		Healthy:     true,
+		Ephemeral:   true,
 	}
-	wg.Wait()
+	go registerInstance(client, registerInstanceParam)
+
 	time.Sleep(360000 * time.Second)
 }
 

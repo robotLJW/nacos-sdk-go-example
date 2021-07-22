@@ -21,6 +21,7 @@ func main() {
 	config.ReadConfig("config", "/conf", "yaml")
 	serviceNameAddr := config.ConfigMessage.Basic.NameServerAddr
 	serviceName, err := name.ReadName(serviceNameAddr)
+	fmt.Println(serviceName)
 	if err != nil {
 		panic(err)
 	}
@@ -67,7 +68,17 @@ func main() {
 		Ephemeral:   true,
 	}
 
-	go registerInstance(client, instanceParam)
+	err = naming.RegisterServiceInstance(client, instanceParam)
+	for {
+		if err != nil {
+			fmt.Println(err)
+			err = naming.RegisterServiceInstance(client, instanceParam)
+		} else {
+			break
+		}
+	}
+
+	//go registerInstance(client, instanceParam)
 
 	time.Sleep(360000 * time.Second)
 
