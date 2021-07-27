@@ -42,11 +42,12 @@ func ReadConfig(configName string, configPath string, configType string) {
 		}
 
 		basicMessage := BasicMessage{
-			InstanceIp:          viper.GetString("basicconfig.instanceIp"),
-			InstancePort:        viper.GetUint64("basicconfig.instancePort"),
-			InstanceClusterName: viper.GetString("basicconfig.instanceClusterName"),
-			SubscribeScope:      viper.GetInt("basicconfig.subscribeScope"),
-			NameServerAddr:      viper.GetString("basicconfig.nameServerAddr"),
+			InstanceIp:             viper.GetString("basicconfig.instanceIp"),
+			InstancePort:           viper.GetUint64("basicconfig.instancePort"),
+			SubscribeInstanceCount: viper.GetInt("basicconfig.subscribeInstanceCount"),
+			InstanceClusterName:    viper.GetString("basicconfig.instanceClusterName"),
+			SubscribeScope:         viper.GetInt("basicconfig.subscribeScope"),
+			NameServerAddr:         viper.GetString("basicconfig.nameServerAddr"),
 		}
 		ConfigMessage = &Config{
 			Server: serverMessage,

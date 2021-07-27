@@ -82,7 +82,8 @@ func main() {
 
 	basicServiceName := config.ConfigMessage.Client.ServiceName
 	scope = config.ConfigMessage.Client.Scope
-	for i := 1; i <= 2; i++ {
+	subscribeNum := config.ConfigMessage.Basic.SubscribeInstanceCount
+	for i := 1; i <= subscribeNum; i++ {
 		subscribeName := randomService(basicServiceName, scope)
 		fmt.Println(subscribeName)
 		err = naming.Subscribe(client, &vo.SubscribeParam{

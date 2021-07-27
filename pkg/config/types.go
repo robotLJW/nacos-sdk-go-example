@@ -17,12 +17,12 @@ type ClientMessage struct {
 }
 
 type BasicMessage struct {
-	InstanceIp          string
-	InstancePort        uint64
-	InstanceCount       int
-	InstanceClusterName string
-	SubscribeScope      int
-	NameServerAddr      string
+	InstanceIp             string
+	InstancePort           uint64
+	SubscribeInstanceCount int
+	InstanceClusterName    string
+	SubscribeScope         int
+	NameServerAddr         string
 }
 
 type Config struct {

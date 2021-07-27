@@ -14,7 +14,7 @@ clientconfig:
 basicconfig:
   instanceIp: "10.10.10.11"
   instancePort: 8080
-  instanceCount: 1
+  subscribeInstanceCount: 1
   instanceClusterName: "cluster-A"
   subscribeScope: 500
   nameServerAddr: "127.0.0.1:8889/name"
