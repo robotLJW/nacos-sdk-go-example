@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -14,40 +13,36 @@ var ConfigMessage *Config
 
 func ReadConfig(configName string, configPath string, configType string) {
 	once.Do(func() {
-		path, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
 		viper.SetConfigName(configName)
-		viper.AddConfigPath(path + configPath)
+		viper.AddConfigPath(configPath)
 		viper.SetConfigType(configType)
-		err = viper.ReadInConfig()
+		err := viper.ReadInConfig()
 		if err != nil {
 			panic(fmt.Errorf("Fatal error config file: %s \n", err))
 		}
 		serverMessage := ServerMessage{
-			IpAddr: viper.GetString("serverconfig.ipaddr"),
-			Port:   viper.GetUint64("serverconfig.port"),
+			IpAddr: viper.GetString("serverConfig.ipaddr"),
+			Port:   viper.GetUint64("serverConfig.port"),
 		}
 
 		clientMessage := ClientMessage{
-			NamespaceId: viper.GetString("clientconfig.namespaceId"),
-			ServiceName: viper.GetString("clientconfig.serviceName"),
-			Scope:       viper.GetInt("clientconfig.scope"),
-			LogDir:      viper.GetString("clientconfig.logDir"),
-			CacheDir:    viper.GetString("clientconfig.cacheDir"),
-			RotateTime:  viper.GetString("clientconfig.rotateTime"),
-			MaxAge:      viper.GetInt64("clientconfig.maxAge"),
-			LogLevel:    viper.GetString("clientconfig.logLevel"),
+			NamespaceId: viper.GetString("clientConfig.namespaceId"),
+			ServiceName: viper.GetString("clientConfig.serviceName"),
+			Scope:       viper.GetInt("clientConfig.scope"),
+			LogDir:      viper.GetString("clientConfig.logDir"),
+			CacheDir:    viper.GetString("clientConfig.cacheDir"),
+			RotateTime:  viper.GetString("clientConfig.rotateTime"),
+			MaxAge:      viper.GetInt64("clientConfig.maxAge"),
+			LogLevel:    viper.GetString("clientConfig.logLevel"),
 		}
 
 		basicMessage := BasicMessage{
-			InstanceIp:             viper.GetString("basicconfig.instanceIp"),
-			InstancePort:           viper.GetUint64("basicconfig.instancePort"),
-			SubscribeInstanceCount: viper.GetInt("basicconfig.subscribeInstanceCount"),
-			InstanceClusterName:    viper.GetString("basicconfig.instanceClusterName"),
-			SubscribeScope:         viper.GetInt("basicconfig.subscribeScope"),
-			NameServerAddr:         viper.GetString("basicconfig.nameServerAddr"),
+			InstanceIp:             viper.GetString("basicConfig.instanceIp"),
+			InstancePort:           viper.GetUint64("basicConfig.instancePort"),
+			SubscribeInstanceCount: viper.GetInt("basicConfig.subscribeInstanceCount"),
+			InstanceClusterName:    viper.GetString("basicConfig.instanceClusterName"),
+			SubscribeScope:         viper.GetInt("basicConfig.subscribeScope"),
+			NameServerAddr:         viper.GetString("basicConfig.nameServerAddr"),
 		}
 		ConfigMessage = &Config{
 			Server: serverMessage,
